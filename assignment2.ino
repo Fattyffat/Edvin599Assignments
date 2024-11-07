@@ -16,15 +16,13 @@ const int LASER6_PIN = 13;
 const int LASER7_PIN = 7;
 const int LASER8_PIN = 6;
 
-
-
 const int relay5VPumps = 23;
 const int relay12VPumps = 25;
 
 CRGB leds[NUM_LEDS];
-CRGB currentColor = CRGB(0, 0, 255);  // Initialize with blue (R=0, G=0, B=255)
+CRGB currentColor = CRGB(0, 0, 255);  
 
-// Variables for timing control
+//variables for timing control
 unsigned long laserStartTime = 0;
 unsigned long laserDuration = 0;
 bool laserActive = false;
@@ -47,12 +45,16 @@ void setup() {
   pinMode(relay5VPumps, OUTPUT);
   pinMode(relay12VPumps, OUTPUT);
 
-  digitalWrite(relay5VPumps, HIGH);    // Ensure 5V relay is off
-  digitalWrite(relay12VPumps, HIGH);   // Ensure 12V relay starts off
+
+  //The relay is a low-active relay
+  //So the HIGH command is what keeps them off and vice versa
+  digitalWrite(relay5VPumps, HIGH);    
+  digitalWrite(relay12VPumps, HIGH);  
   
+  //38400 allows for faster communication instead of 9600bps 
   Serial.begin(38400);
 
-  // Set initial LED color to blue
+  //set initial LED color to blue
   fill_solid(leds, NUM_LEDS, currentColor);
   FastLED.show();
 }
@@ -60,7 +62,7 @@ void setup() {
 void loop() {
   unsigned long currentTime = millis();
   
-  // Turn off laser if duration has elapsed
+  //turn off laser if duration has elapsed
   if (laserActive && (currentTime - laserStartTime >= laserDuration)) {
     digitalWrite(LASER1_PIN, LOW);
     digitalWrite(LASER2_PIN, LOW);
@@ -77,7 +79,7 @@ void loop() {
     char command = Serial.read();
     
     if (command == 'L') {
-      // Turn lasers on for specified duration
+      //turn lasers on for specified duration
       while (Serial.available() < 2) { /* wait */ }
       byte durationHigh = Serial.read();
       byte durationLow = Serial.read();
@@ -97,7 +99,7 @@ void loop() {
     }
     
     else if (command == 'R') {
-      // Set RGB LED color
+      //set RGB LED color
       while (Serial.available() < 3) { /* wait */ }
       
       byte r = Serial.read();
@@ -109,31 +111,33 @@ void loop() {
       FastLED.show();
     }
 
-    else if (command == 'C') {  // Combined flash and 5V pump command
-      // Wait for the RGB values of the flash color
+    else if (command == 'C') { 
+      //wait for the RGB values
       while (Serial.available() < 3) { /* wait */ }
       
       byte flashR = Serial.read();
       byte flashG = Serial.read();
       byte flashB = Serial.read();
       
-      // Save current color
+      //save current color
       CRGB originalColor = currentColor;
       
-      // Set flash color
+      //set flash color
+      //I do a flash color as I don't want the rgb strip playing with the melody during pump commands
+      //the reason for this is simple: without it, the pumps lag behind..
       fill_solid(leds, NUM_LEDS, CRGB(flashR, flashG, flashB));
       FastLED.show();
       
-      // Only pulse the 5V pumps
-      digitalWrite(relay5VPumps, LOW);   // Activate 5V pumps
-      digitalWrite(relay12VPumps, LOW);   // Turn on 12V pumps
+      //pump the pumps
+      digitalWrite(relay5VPumps, LOW);  
+      digitalWrite(relay12VPumps, LOW);   
 
-      delay(1000);  // Duration for flash and 5V pump
-      digitalWrite(relay5VPumps, HIGH);  // Deactivate 5V pumps
-      digitalWrite(relay12VPumps, HIGH);  // Turn off 12V pumps
+      delay(1000);  
+      digitalWrite(relay5VPumps, HIGH);  
+      digitalWrite(relay12VPumps, HIGH); 
 
 
-      // Return to original color
+      //return to original color after flash
       fill_solid(leds, NUM_LEDS, originalColor);
       FastLED.show();
     }
