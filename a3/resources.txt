@@ -1,0 +1,8 @@
+Here is a list of resources used for this assignment:
+
+Everything was basically obtained from the Vixen Lights official website: 
+https://www.vixenlights.com/docs/
+
+DoItYourselfChristmas - The developer is very active on this site and there is a dedicated Vixen support forum.
+I actually had some trouble sending over the 8 bit custom values and the developer of Vixen was kind enough to help me with my issue:
+https://doityourselfchristmas.com/forum/index.php?threads/how-to-send-custom-value-to-arduino-from-vixen.60936/
